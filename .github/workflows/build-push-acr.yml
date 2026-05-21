@@ -64,6 +64,8 @@ jobs:
           file: ./app/Dockerfile
           push: true
           tags: ${{ steps.vars.outputs.FULL_IMAGE }}
+          # PAKSA ARSITEKTUR KE LINUX AMD64 AGAR SESUAI DENGAN NODE AKS 🚀
+          platforms: linux/amd64
           # Cache layer di GitHub Actions cache — mempercepat build berikutnya
           cache-from: type=gha
           cache-to: type=gha,mode=max
