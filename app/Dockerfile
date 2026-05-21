@@ -1,9 +1,14 @@
 # ── Stage 1: Build ─────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+# Pakai node:18 — react-scripts@5 tidak kompatibel penuh dengan node:20
+# (ajv/dist/compile/codegen conflict di node 20)
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 COPY package.json ./
-RUN npm install --legacy-peer-deps
+
+# Install dependencies + fix ajv yang missing di react-scripts@5 + node 18
+RUN npm install --legacy-peer-deps && \
+    npm install ajv@^8.0.0 --legacy-peer-deps
 
 COPY public/ ./public/
 COPY src/ ./src/
