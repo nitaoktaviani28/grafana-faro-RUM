@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RUM Shop — Grafana Faro Assessment</title>
+  <script>
+    // Runtime config — diisi oleh Kubernetes ConfigMap env-var via nginx
+    window.FARO_COLLECTOR_URL = "%FARO_COLLECTOR_URL%";
+  </script>
+</head>
+<body>
+  <noscript>JavaScript diperlukan untuk menjalankan aplikasi ini.</noscript>
+  <div id="root"></div>
+</body>
+</html>

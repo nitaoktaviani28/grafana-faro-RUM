@@ -1,0 +1,41 @@
+---
+# ══════════════════════════════════════════════════════════════════════════════
+# Tambah port 12347 (Faro receiver) ke Alloy Service
+#
+# PILIHAN A — kubectl patch (paling aman, tidak replace port lain):
+#
+#   kubectl patch svc alloy -n monitoring --type='json' -p='[
+#     {
+#       "op": "add",
+#       "path": "/spec/ports/-",
+#       "value": {
+#         "name": "faro",
+#         "port": 12347,
+#         "targetPort": 12347,
+#         "protocol": "TCP"
+#       }
+#     }
+#   ]'
+#
+# PILIHAN B — Helm values (tambahkan ke values.yaml yang sudah ada):
+#   Tambahkan entry berikut di bawah extraPorts yang sudah ada:
+#
+#   alloy:
+#     extraPorts:
+#       - name: otlp-grpc      # existing
+#         port: 4317
+#         targetPort: 4317
+#         protocol: TCP
+#       - name: otlp-http      # existing
+#         port: 4318
+#         targetPort: 4318
+#         protocol: TCP
+#       - name: faro           # ← TAMBAHAN BARU
+#         port: 12347
+#         targetPort: 12347
+#         protocol: TCP
+#
+# Setelah salah satu dijalankan, verifikasi:
+#   kubectl get svc alloy -n monitoring
+#   → harus muncul port 12347
+# ══════════════════════════════════════════════════════════════════════════════

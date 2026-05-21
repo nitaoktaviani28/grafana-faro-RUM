@@ -1,0 +1,89 @@
+---
+# ── Namespace ──────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rum-demo
+  labels:
+    app.kubernetes.io/part-of: rum-assessment
+
+---
+# ── ConfigMap ──────────────────────────────────────────────────────────────
+# FARO_COLLECTOR_URL = /faro/collect
+# → nginx di pod rum-shop yang proxy ke alloy.monitoring.svc.cluster.local:12347
+# → Tidak perlu IP external, semua in-cluster
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rum-shop-config
+  namespace: rum-demo
+data:
+  FARO_COLLECTOR_URL: "/faro/collect"
+
+---
+# ── Deployment ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rum-shop
+  namespace: rum-demo
+  labels:
+    app: rum-shop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rum-shop
+  template:
+    metadata:
+      labels:
+        app: rum-shop
+    spec:
+      containers:
+        - name: rum-shop
+          # Ganti dengan image registry kamu
+          image: your-registry/rum-shop:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          envFrom:
+            - configMapRef:
+                name: rum-shop-config
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+---
+# ── Service ────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: rum-shop
+  namespace: rum-demo
+  labels:
+    app: rum-shop
+spec:
+  selector:
+    app: rum-shop
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  type: ClusterIP

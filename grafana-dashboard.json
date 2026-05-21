@@ -1,0 +1,253 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
+  "description": "Grafana Faro RUM — Web Vitals, Errors, Sessions, Custom Events",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "🌐 Web Vitals",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 2500 },
+              { "color": "red", "value": 4000 }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "avg_over_time({source=\"faro\",app=\"rum-shop\"} | json | kind=\"measurement\" | measurement_type=\"lcp\" | unwrap measurement_value [$__range])",
+          "legendFormat": "LCP (avg)"
+        }
+      ],
+      "title": "LCP — Largest Contentful Paint",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 300 }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "avg_over_time({source=\"faro\",app=\"rum-shop\"} | json | kind=\"measurement\" | measurement_type=\"fid\" | unwrap measurement_value [$__range])",
+          "legendFormat": "FID (avg)"
+        }
+      ],
+      "title": "FID — First Input Delay",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.1 },
+              { "color": "red", "value": 0.25 }
+            ]
+          },
+          "unit": "short",
+          "decimals": 3
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "avg_over_time({source=\"faro\",app=\"rum-shop\"} | json | kind=\"measurement\" | measurement_type=\"cls\" | unwrap measurement_value [$__range])",
+          "legendFormat": "CLS (avg)"
+        }
+      ],
+      "title": "CLS — Cumulative Layout Shift",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["sum"] } },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "count_over_time({source=\"faro\",app=\"rum-shop\"} | json | kind=\"event\" | event_name=\"page_view\" [$__range])",
+          "legendFormat": "Page Views"
+        }
+      ],
+      "title": "Total Page Views",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+      "id": 101,
+      "title": "🛒 Custom Events — E-commerce Funnel",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 5,
+      "options": { "barAlignment": 0, "fillOpacity": 20 },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "sum by (event_name) (count_over_time({source=\"faro\",app=\"rum-shop\"} | json | kind=\"event\" [$__interval]))",
+          "legendFormat": "{{event_name}}"
+        }
+      ],
+      "title": "Custom Events Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 6,
+      "options": { "pieType": "donut", "displayLabels": ["name", "value"] },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "sum by (event_name) (count_over_time({source=\"faro\",app=\"rum-shop\"} | json | kind=\"event\" | event_name=~\"add_to_cart|checkout_initiated|purchase_completed\" [$__range]))",
+          "legendFormat": "{{event_name}}"
+        }
+      ],
+      "title": "Conversion Funnel",
+      "type": "piechart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+      "id": 102,
+      "title": "🔴 Errors & Exceptions",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 17 },
+      "id": 7,
+      "options": {
+        "dedupStrategy": "none",
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "{source=\"faro\",app=\"rum-shop\"} | json | kind=\"exception\"",
+          "legendFormat": ""
+        }
+      ],
+      "title": "Error Logs (kind=exception)",
+      "type": "logs"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+      "id": 103,
+      "title": "📍 Session Tracing",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 28 },
+      "id": 8,
+      "options": { "reduceOptions": { "calcs": ["distinctCount"] } },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "count_over_time({source=\"faro\",app=\"rum-shop\"} | json | session_id!=\"\" [$__range])",
+          "legendFormat": "Sessions"
+        }
+      ],
+      "title": "Active Sessions",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 28 },
+      "id": 9,
+      "options": {},
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${datasource_loki}" },
+          "expr": "sum by (session_id) (count_over_time({source=\"faro\",app=\"rum-shop\"} | json [$__interval]))",
+          "legendFormat": "Session {{session_id}}"
+        }
+      ],
+      "title": "Events per Session",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["faro", "rum", "frontend", "assessment"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "name": "datasource_loki",
+        "options": [],
+        "query": "loki",
+        "refresh": 1,
+        "type": "datasource",
+        "label": "Loki Datasource"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Jakarta",
+  "title": "Grafana Faro RUM — Shop Assessment",
+  "uid": "faro-rum-shop-assessment",
+  "version": 1
+}

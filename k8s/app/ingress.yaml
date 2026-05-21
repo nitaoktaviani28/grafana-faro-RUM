@@ -1,0 +1,27 @@
+---
+# ── Ingress ────────────────────────────────────────────────────────────────
+# Grafana kamu sudah di: 20.236.41.38
+# Alloy LoadBalancer:    20.115.192.181
+#
+# Ganti host dengan hostname kamu atau pakai nip.io untuk testing:
+#   rum-shop.<node-ip>.nip.io
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rum-shop
+  namespace: rum-demo
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: rum-shop.example.com   # ← ganti dengan hostname kamu
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rum-shop
+                port:
+                  number: 80
