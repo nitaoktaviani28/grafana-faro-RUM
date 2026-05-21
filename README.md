@@ -1,6 +1,6 @@
 # 🛍️ RUM Shop — Grafana Faro Assessment
 
-Aplikasi demo e-commerce untuk assessment **Grafana Faro RUM** yang terintegrasi dengan **LGTM-FP Stack** di Kubernetes, menggunakan **Grafana Alloy** sebagai agent.
+Aplikasi demo e-commerce untuk assessment **Grafana Faro RUM** yang terintegrasi dengan **LGTM-FP Stack** di Kubernetes, menggunakan **Grafana Alloy** sebagai agent. contoh
 
 ## Arsitektur
 
