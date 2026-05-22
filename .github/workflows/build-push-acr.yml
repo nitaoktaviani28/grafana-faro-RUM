@@ -1,6 +1,5 @@
 name: Build & Push to ACR
 
-# Trigger setiap ada push ke branch manapun
 on:
   push:
     branches:
@@ -22,8 +21,6 @@ jobs:
         uses: actions/checkout@v4
 
       # ── 2. Set image tag dari SHA commit (7 karakter) ────────────────────
-      #    Format: sha-a1b2c3d
-      #    Unik per commit, tidak pernah overwrite
       - name: Set image tag
         id: vars
         run: |
@@ -34,15 +31,6 @@ jobs:
           echo "→ Full image: ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:sha-${SHORT_SHA}"
 
       # ── 3. Login ke ACR ──────────────────────────────────────────────────
-      #    Butuh secrets: ACR_USERNAME dan ACR_PASSWORD
-      #    Cara lihat password ACR, jalankan di terminal kamu:
-      #
-      #      az acr credential show --name imagelcpprd --query "passwords[0].value" -o tsv
-      #
-      #    Lalu simpan hasilnya ke GitHub Secrets:
-      #      Settings → Secrets and variables → Actions → New repository secret
-      #      Name: ACR_USERNAME  → Value: imagelcpprd
-      #      Name: ACR_PASSWORD  → Value: <output command di atas>
       - name: Login to ACR
         uses: docker/login-action@v3
         with:
@@ -50,13 +38,19 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      # ── 4. Setup Docker Buildx (untuk cache & multi-platform) ────────────
+      # ── 4. Setup QEMU — diperlukan untuk cross-platform build ─────────────
+      #    AKS node berjalan di linux/amd64, runner GitHub bisa arm64
+      #    QEMU memastikan image selalu di-build untuk linux/amd64
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # ── 5. Setup Docker Buildx ────────────────────────────────────────────
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # ── 5. Build & Push ──────────────────────────────────────────────────
-      #    Tag yang dipakai: sha-<7char>
-      #    Tidak ada tag latest — setiap push punya tag unik
+      # ── 6. Build & Push ───────────────────────────────────────────────────
+      #    platforms: linux/amd64 → sesuai AKS node architecture
+      #    Tag: sha-<7char>, tidak ada latest
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -64,18 +58,15 @@ jobs:
           file: ./app/Dockerfile
           push: true
           tags: ${{ steps.vars.outputs.FULL_IMAGE }}
-          # PAKSA ARSITEKTUR KE LINUX AMD64 AGAR SESUAI DENGAN NODE AKS 🚀
           platforms: linux/amd64
-          # Cache layer di GitHub Actions cache — mempercepat build berikutnya
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # Build args (opsional)
           build-args: |
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             GIT_SHA=${{ github.sha }}
             GIT_BRANCH=${{ github.ref_name }}
 
-      # ── 6. Print summary ─────────────────────────────────────────────────
+      # ── 7. Print summary ──────────────────────────────────────────────────
       - name: Print image info
         run: |
           echo "════════════════════════════════════════"
